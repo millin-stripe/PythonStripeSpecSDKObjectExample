@@ -53,6 +53,8 @@ for (k, v) in specPaths.items():
             #See if Type is an object and set processVar
                 if (opParamsValue['type'] == 'object'):
                     processVar = True
+                if (opParamsValue['type'] == 'array'):
+                    processVar = True
             if 'anyOf' in opParamsValue:
                 processVar = True
                 #Only Process Objects
@@ -76,7 +78,7 @@ for (k, v) in specPaths.items():
                 #Loop over all the custom param names we know to look for when no match is found
                 while foundClass == False:
                     for opParam in opParams:
-                        #Verify 
+                         
                         if 'properties' in opsClass:
                             #See if the Parameter is in the Class Properties
                             if opParam in opsClass['properties']:
@@ -100,6 +102,15 @@ for (k, v) in specPaths.items():
                                     #             pathreturns[key][operationKey][opParam]['ClassRef'] = x['$ref']
                                     #             continue
                                                 #foundClass = True
+                                #Finding Arrays that map
+                                if 'items' in opsClass['properties'][opParam] and foundClass != True:
+                                    for y in opsClass['properties'][opParam]['items']:
+                                        if '$ref' in y and foundClass != True:
+                                            pathreturns[key][operationKey][opParam] = {}
+                                            pathreturns[key][operationKey][opParam]['ClassRef'] = opsClass['properties'][opParam]['items']['$ref']
+                                            pathreturns[key][operationKey][opParam]['OriginalParamName'] = OriginalParameterName
+                                            foundClass = True
+                                #Finding Where opParam is in the class properties
                                 if '$ref' in opsClass['properties'][opParam] and foundClass != True:
                                     pathreturns[key][operationKey][opParam] = {}
                                     pathreturns[key][operationKey][opParam]['ClassRef'] = opsClass['properties'][opParam]['$ref']
@@ -108,30 +119,34 @@ for (k, v) in specPaths.items():
                         #The Next check we could do is see if the variable is found in the inner_classes list
                         #Not sure if this woill do anything more than the class check and it is conditional based on the class check
                         #Verify x-stripeResource is an attribute in opsClass
-                        if 'x-stripeResource' in opsClass and foundClass != True:
-                            #verify inner_classes is an attribute of opsClass['x-stripeResource']
-                            if 'inner_classes' in opsClass['x-stripeResource']:
-                                #Verify Paramkey is in opsClass['x-stripeResource']['inner_classes']
-                                if opParam in opsClass['x-stripeResource']['inner_classes']:
-                                    pathreturns[key][operationKey][opParam] = {}
-                                    pathreturns[key][operationKey][opParam]['ClassName'] = opParam
-                                    pathreturns[key][operationKey][opParam]['OriginalParamName'] = OriginalParameterName
-                                    foundClass = True
+
+
+                        #####Commenting out the inner Class stuff
+
+                        # if 'x-stripeResource' in opsClass and foundClass != True:
+                        #     #verify inner_classes is an attribute of opsClass['x-stripeResource']
+                        #     if 'inner_classes' in opsClass['x-stripeResource']:
+                        #         #Verify Paramkey is in opsClass['x-stripeResource']['inner_classes']
+                        #         if opParam in opsClass['x-stripeResource']['inner_classes']:
+                        #             pathreturns[key][operationKey][opParam] = {}
+                        #             pathreturns[key][operationKey][opParam]['ClassName'] = opParam
+                        #             pathreturns[key][operationKey][opParam]['OriginalParamName'] = OriginalParameterName
+                        #             foundClass = True
                                     
-                                    #foundClass = True
-                                #Verify ClassName_opParam is in opsClass['x-stripeResource']['inner_classes']    
-                                if classpaththree + '_' + opParam in opsClass['x-stripeResource']['inner_classes']:
-                                    pathreturns[key][operationKey][opParam] = {}
-                                    pathreturns[key][operationKey][opParam]['ClassName'] = classpaththree + '_' + opParam
-                                    foundClass = True
+                        #             #foundClass = True
+                        #         #Verify ClassName_opParam is in opsClass['x-stripeResource']['inner_classes']    
+                        #         if classpaththree + '_' + opParam in opsClass['x-stripeResource']['inner_classes']:
+                        #             pathreturns[key][operationKey][opParam] = {}
+                        #             pathreturns[key][operationKey][opParam]['ClassName'] = classpaththree + '_' + opParam
+                        #             foundClass = True
                                     
-                                    #foundClass = True
+                        #             #foundClass = True
                                 
-                                if opParam == 'metadata':
-                                    pathreturns[key][operationKey][opParam] = {}
-                                    pathreturns[key][operationKey][opParam]['ClassName'] = 'MetaData'
-                                    pathreturns[key][operationKey][opParam]['Metadata'] = True
-                                    foundClass = True
+                        if opParam == 'metadata':
+                            pathreturns[key][operationKey][opParam] = {}
+                            pathreturns[key][operationKey][opParam]['ClassName'] = 'MetaData'
+                            pathreturns[key][operationKey][opParam]['Metadata'] = True
+                            foundClass = True
 
                     if foundInnerList == False and foundClass == False: 
                         foundClass = True             
